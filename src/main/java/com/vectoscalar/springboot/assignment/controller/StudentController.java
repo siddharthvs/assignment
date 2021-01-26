@@ -13,10 +13,11 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.vectoscalar.springboot.assignment.entity.Address;
 import com.vectoscalar.springboot.assignment.entity.Student;
+import com.vectoscalar.springboot.assignment.service.AddressService;
 import com.vectoscalar.springboot.assignment.service.StudentService;
 
 @RestController
@@ -25,6 +26,9 @@ public class StudentController {
 
 	@Autowired
 	private StudentService studentService;
+	
+	@Autowired
+	private AddressService addressService;
 	
 	public StudentController() {
 		
@@ -88,6 +92,10 @@ public class StudentController {
 			throw new EntityNotFoundException("Student id not found - " + studentId);
 		}
 
+		for(Address address : student.getAddresses()) {
+			address.setDeletedAt(LocalDateTime.now());
+		}
+		
 		student.setDeletedAt(LocalDateTime.now());
 		studentService.save(student);
 		

@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -40,7 +41,7 @@ public class Student{
 		@Column(name="email", unique=true, nullable = false)
 		private String email;
 		
-		@OneToMany(mappedBy="student", fetch = FetchType.LAZY)
+		@OneToMany(mappedBy="student", fetch = FetchType.LAZY,cascade = CascadeType.ALL)
 		private List<Address> addresses;
 		
 		@CreationTimestamp
