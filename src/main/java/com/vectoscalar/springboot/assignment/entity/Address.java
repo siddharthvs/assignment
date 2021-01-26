@@ -29,10 +29,10 @@ public class Address {
 	@Column(name="id")
 	private int id;
 	
-	@Column(name="address")
+	@Column(name="address", nullable = false)
 	private String address;
 
-	@Column(name="city")
+	@Column(name="city", nullable = false)
 	private String city;
 	
 	@Column(name="state")

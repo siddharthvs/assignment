@@ -37,7 +37,7 @@ public class Student{
 		@Column(name="last_name")
 		private String lastName;
 		
-		@Column(name="email", unique=true)
+		@Column(name="email", unique=true, nullable = false)
 		private String email;
 		
 		@OneToMany(mappedBy="student", fetch = FetchType.LAZY)
