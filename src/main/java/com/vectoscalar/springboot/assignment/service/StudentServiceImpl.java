@@ -47,13 +47,15 @@ public class StudentServiceImpl implements StudentService {
 		if(theStudent != null) {
 			student.setId(theStudent.getId());			
 		}
-		List<Address> addresses = student.getAddresses();
-		
-		student.setAddresses(null);
-		
-		for(Address address : addresses)
-		{
-			student.addAddress(address);
+		if(student.getAddresses() != null) {
+			List<Address> addresses = student.getAddresses();
+			
+			student.setAddresses(null);
+			
+			for(Address address : addresses)
+			{
+				student.addAddress(address);
+			}
 		}
 		
 		studentRepository.save(student);

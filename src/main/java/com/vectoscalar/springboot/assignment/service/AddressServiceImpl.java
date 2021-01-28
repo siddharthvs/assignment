@@ -10,12 +10,16 @@ import org.springframework.stereotype.Service;
 
 import com.vectoscalar.springboot.assignment.dao.AddressRepository;
 import com.vectoscalar.springboot.assignment.entity.Address;
+import com.vectoscalar.springboot.assignment.entity.Student;
 
 @Service
 public class AddressServiceImpl implements AddressService {
 
 	@Autowired
 	private AddressRepository addressRepository;
+	
+	@Autowired
+	private StudentService studentService;
 	
 	public AddressServiceImpl() {
 		
@@ -44,6 +48,8 @@ public class AddressServiceImpl implements AddressService {
 
 	@Override
 	public void save(Address address) {
+		Student student = studentService.findById(address.getStudentId());
+		student.addAddress(address);
 		addressRepository.save(address);
 	}
 

@@ -60,7 +60,7 @@ public class Address {
     @JoinColumn(name="student_id")
     private Student student;
    
-    @Column(name="student_id", insertable=false, updatable=false)
+    @Column(name="student_id", insertable=false, updatable=false, nullable=false)
     private Integer studentId;
 
 	public Address() {
