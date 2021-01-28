@@ -1,23 +1,28 @@
 package com.vectoscalar.springboot.assignment.controller;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 import javax.persistence.EntityNotFoundException;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vectoscalar.springboot.assignment.entity.Address;
 import com.vectoscalar.springboot.assignment.entity.Student;
+import com.vectoscalar.springboot.assignment.request.AddressRequest;
+import com.vectoscalar.springboot.assignment.response.AddressResponse;
+import com.vectoscalar.springboot.assignment.response.StudentResponse;
 import com.vectoscalar.springboot.assignment.service.AddressService;
 import com.vectoscalar.springboot.assignment.service.StudentService;
 
@@ -28,9 +33,6 @@ public class AddressController {
 	@Autowired
 	private AddressService addressService;
 	
-	@Autowired
-	private StudentService studentService;
-	
 	public AddressController() {
 		
 	}
@@ -38,14 +40,16 @@ public class AddressController {
 	// expose "/addresses" and return list of addresses
 	
 	@GetMapping("")
-	public List<Address> findAllByStudentId(@RequestParam Integer studentId) {
-		return addressService.findByStudentId(studentId);
+	public ResponseEntity<List<AddressResponse>> findAllByStudentId(@RequestParam Integer studentId) {
+		List<Address> addresses = addressService.findByStudentId(studentId);
+		List<AddressResponse> addressResponse = new ObjectMapper().convertValue(addresses,  new TypeReference<List<AddressResponse>>() {});
+		return new ResponseEntity<>(addressResponse, HttpStatus.OK);
 	}
 
 	// add mapping for GET /addresses/{addressId}
 	
 	@GetMapping("/{addressId}")
-	public Address getAddress(@PathVariable Integer addressId) {
+	public ResponseEntity<AddressResponse> getAddress(@PathVariable Integer addressId) {
 		
 		Address address = addressService.findById(addressId);
 		
@@ -53,49 +57,29 @@ public class AddressController {
 			throw new EntityNotFoundException("Address id not found - " + addressId);
 		}
 		
-		return address;
+		AddressResponse addressResponse = new ObjectMapper().convertValue(address, AddressResponse.class);
+		
+		return new ResponseEntity<>(addressResponse, HttpStatus.OK);
 	}
 	
-	// add mapping for POST /addresses - add new address
+	// add mapping for POST /addresses - add new address or update an existing address
 	
 	@PostMapping("")
-	public Address addAddress(@RequestBody Address address) {
+	public ResponseEntity<AddressResponse> addAddress(@RequestBody AddressRequest addressRequest) {
 		
-		// also if in case they pass an id in JSON ... set id to 0
-		// this is to force a save of new item ... instead of update
-		
-		address.setId(0);
+		Address address = new ObjectMapper().convertValue(addressRequest, Address.class);
 		
 		addressService.save(address);
-		
-		return address;
-	}
 	
-	// add mapping for PUT /addresses - update existing address
-	
-	@PutMapping("")
-	public Address updateAddress(@RequestBody Address address) {
-		
-		addressService.save(address);
-		
-		return address;
+		AddressResponse addressResponse = new ObjectMapper().convertValue(address, AddressResponse.class);
+
+		return new ResponseEntity<>(addressResponse, HttpStatus.CREATED);
 	}
-		
-	// add mapping for DELETE /addresses/{addressId} - delete address
 	
 	@DeleteMapping("/{addressId}")
 	public String deleteAddress(@PathVariable Integer addressId) {
 		
-		Address address = addressService.findById(addressId);
-		
-		// throw exception if null
-		
-		if (address == null) {
-			throw new EntityNotFoundException("Address id not found - " + addressId);
-		}
-
-		address.setDeletedAt(LocalDateTime.now());
-		addressService.save(address);
+		addressService.deleteById(addressId);
 		
 		return "Deleted address id - " + addressId;
 	}

@@ -17,7 +17,9 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.annotations.Where;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 @Entity
 @Table(name="Address")
@@ -52,12 +54,13 @@ public class Address {
     @Column(name = "deleted_at")
 	private LocalDateTime deletedAt;
 
+    @JsonBackReference
     @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     @ManyToOne(fetch=FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.DETACH, CascadeType.MERGE, CascadeType.REFRESH})
-    @JoinColumn(name="student_id", insertable=false, updatable=false)
+    @JoinColumn(name="student_id")
     private Student student;
    
-    @Column(name="student_id", nullable=false)
+    @Column(name="student_id", insertable=false, updatable=false)
     private Integer studentId;
 
 	public Address() {
@@ -128,9 +131,9 @@ public class Address {
 		this.deletedAt = deletedAt;
 	}
 	
-//	public Student getStudent() {
-//		return student;
-//	}
+	public Student getStudent() {
+		return student;
+	}
 
 	public void setStudent(Student student) {
 		this.student = student;

@@ -19,6 +19,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.annotations.Where;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 @Entity
 @Table(name="student")
@@ -41,7 +42,8 @@ public class Student{
 		@Column(name="email", unique=true, nullable = false)
 		private String email;
 		
-		@OneToMany(mappedBy="student", fetch = FetchType.LAZY,cascade = CascadeType.ALL)
+		@JsonManagedReference
+		@OneToMany(mappedBy="student", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
 		private List<Address> addresses;
 		
 		@CreationTimestamp
@@ -141,12 +143,14 @@ public class Student{
 		}
 		
 		public void addAddress(Address address) {
-			if(addresses == null) {
-				addresses = new ArrayList<>();
+			if(address != null) {
+				if(addresses == null) {
+					addresses = new ArrayList<Address>();
+				}
+				
+				addresses.add(address);
+				address.setStudent(this);
 			}
-			
-			addresses.add(address);
-			address.setStudent(this);
 		}
 			
 }

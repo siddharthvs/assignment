@@ -1,23 +1,25 @@
 package com.vectoscalar.springboot.assignment.controller;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 import javax.persistence.EntityNotFoundException;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.vectoscalar.springboot.assignment.entity.Address;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vectoscalar.springboot.assignment.entity.Student;
-import com.vectoscalar.springboot.assignment.service.AddressService;
+import com.vectoscalar.springboot.assignment.request.StudentRequest;
+import com.vectoscalar.springboot.assignment.response.StudentResponse;
 import com.vectoscalar.springboot.assignment.service.StudentService;
 
 @RestController
@@ -27,9 +29,6 @@ public class StudentController {
 	@Autowired
 	private StudentService studentService;
 	
-	@Autowired
-	private AddressService addressService;
-	
 	public StudentController() {
 		
 	}
@@ -37,68 +36,45 @@ public class StudentController {
 	// expose "/students" and return list of students
 	
 	@GetMapping("")
-	public List<Student> findAll() {
-		return studentService.findAll();
+	public ResponseEntity<List<StudentResponse>> findAll() {
+		List<Student> students = studentService.findAll();
+		List<StudentResponse> studentResponse = new ObjectMapper().convertValue(students,  new TypeReference<List<StudentResponse>>() {});
+		return new ResponseEntity<>(studentResponse, HttpStatus.OK);
 	}
 
 	// add mapping for GET /students/{studentId}
 	
 	@GetMapping("/{studentId}")
-	public Student getStudent(@PathVariable Integer studentId){
+	public ResponseEntity<StudentResponse> getStudent(@PathVariable Integer studentId){
 		Student student = studentService.findById(studentId);
 		
 		if (student == null) {
 			throw new EntityNotFoundException("Student id not found - " + studentId);
 		}
+		StudentResponse studentResponse = new ObjectMapper().convertValue(student, StudentResponse.class);
 		
-		return student;
+		return new ResponseEntity<>(studentResponse, HttpStatus.OK);
 	}
 	
-	// add mapping for POST /students - add new student
+	// add mapping for POST /students - add new student or update an existing student
 	
 	@PostMapping("")
-	public Student addStudent(@RequestBody Student student) {
+	public ResponseEntity<StudentResponse> addStudent(@RequestBody StudentRequest studentRequest) {
 		
-		// also if in case they pass an id in JSON ... set id to 0
-		// this is to force a save of new item ... instead of update
-		
-		student.setId(0);
-		
+		Student student = new ObjectMapper().convertValue(studentRequest, Student.class);
+
 		studentService.save(student);
 		
-		return student;
-	}
-	
-	// add mapping for PUT /students - update existing employee
-	
-	@PutMapping("")
-	public Student updateStudent(@RequestBody Student student) {
-		
-		studentService.save(student);
-		
-		return student;
+		StudentResponse studentResponse = new ObjectMapper().convertValue(student, StudentResponse.class);
+
+		return new ResponseEntity<>(studentResponse, HttpStatus.CREATED);
 	}
 		
 	// add mapping for DELETE /students/{studentId} - delete student
 	
 	@DeleteMapping("/{studentId}")
 	public String deleteStudent(@PathVariable Integer studentId){
-		
-		Student student = studentService.findById(studentId);
-		
-		// throw exception if null
-		
-		if (student == null) {
-			throw new EntityNotFoundException("Student id not found - " + studentId);
-		}
-
-		for(Address address : student.getAddresses()) {
-			address.setDeletedAt(LocalDateTime.now());
-		}
-		
-		student.setDeletedAt(LocalDateTime.now());
-		studentService.save(student);
-		
+		studentService.deleteById(studentId);
 		return "Deleted student id - " + studentId;
 	}
 }
