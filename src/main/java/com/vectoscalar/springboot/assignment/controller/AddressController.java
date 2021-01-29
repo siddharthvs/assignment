@@ -4,6 +4,8 @@ import java.util.List;
 
 import javax.persistence.EntityNotFoundException;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,15 +18,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.vectoscalar.springboot.assignment.entity.Address;
-import com.vectoscalar.springboot.assignment.entity.Student;
 import com.vectoscalar.springboot.assignment.request.AddressRequest;
 import com.vectoscalar.springboot.assignment.response.AddressResponse;
-import com.vectoscalar.springboot.assignment.response.StudentResponse;
 import com.vectoscalar.springboot.assignment.service.AddressService;
-import com.vectoscalar.springboot.assignment.service.StudentService;
+import com.vectoscalar.springboot.assignment.service.StudentServiceImpl;
+import com.vectoscalar.springboot.assignment.util.CommonUtilities;
 
 @RestController
 @RequestMapping("/addresses")
@@ -33,6 +32,8 @@ public class AddressController {
 	@Autowired
 	private AddressService addressService;
 	
+	private static Logger logger = LoggerFactory.getLogger(StudentServiceImpl.class);
+
 	public AddressController() {
 		
 	}
@@ -40,45 +41,45 @@ public class AddressController {
 	// expose "/addresses" and return list of addresses
 	
 	@GetMapping("")
-	public ResponseEntity<List<AddressResponse>> findAllByStudentId(@RequestParam Integer studentId) {
-		List<Address> addresses = addressService.findByStudentId(studentId);
-		List<AddressResponse> addressResponse = new ObjectMapper().convertValue(addresses,  new TypeReference<List<AddressResponse>>() {});
-		return new ResponseEntity<>(addressResponse, HttpStatus.OK);
+	public ResponseEntity<List<AddressResponse>> findAllAddressesByStudentId(@RequestParam Integer studentId) {
+		logger.info("Request Recieved to fetch addresses of studentId: "+studentId);
+		List<AddressResponse> addresses = addressService.findByStudentId(studentId);
+		return new ResponseEntity<>(addresses, HttpStatus.OK);
 	}
 
 	// add mapping for GET /addresses/{addressId}
 	
 	@GetMapping("/{addressId}")
 	public ResponseEntity<AddressResponse> getAddress(@PathVariable Integer addressId) {
-		
-		Address address = addressService.findById(addressId);
+		logger.info("Request Recieved to fetch addressesId: "+addressId);
+		AddressResponse address = addressService.findById(addressId);
 		
 		if (address == null) {
+			logger.info("Did not find AddressId: "+ addressId);
 			throw new EntityNotFoundException("Address id not found - " + addressId);
 		}
-		
-		AddressResponse addressResponse = new ObjectMapper().convertValue(address, AddressResponse.class);
-		
-		return new ResponseEntity<>(addressResponse, HttpStatus.OK);
+				
+		return new ResponseEntity<>(address, HttpStatus.OK);
 	}
 	
 	// add mapping for POST /addresses - add new address or update an existing address
 	
 	@PostMapping("")
-	public ResponseEntity<AddressResponse> addAddress(@RequestBody AddressRequest addressRequest) {
+	public ResponseEntity<AddressResponse> addAddress(@RequestBody AddressRequest addressRequest) throws Exception {
 		
-		Address address = new ObjectMapper().convertValue(addressRequest, Address.class);
+		logger.info("Add Address Request Recieved -- " + CommonUtilities.convertObjectToJsonString(addressRequest));
 		
-		addressService.save(address);
+		addressService.save(addressRequest);
 	
-		AddressResponse addressResponse = new ObjectMapper().convertValue(address, AddressResponse.class);
+		AddressResponse addressResponse = new ObjectMapper().convertValue(addressRequest, AddressResponse.class);
 
 		return new ResponseEntity<>(addressResponse, HttpStatus.CREATED);
 	}
 	
 	@DeleteMapping("/{addressId}")
 	public String deleteAddress(@PathVariable Integer addressId) {
-		
+		logger.info("Request Recieved to delete Address with addressId: " + addressId);
+
 		addressService.deleteById(addressId);
 		
 		return "Deleted address id - " + addressId;

@@ -4,6 +4,8 @@ import java.util.List;
 
 import javax.persistence.EntityNotFoundException;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -15,12 +17,12 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.vectoscalar.springboot.assignment.entity.Student;
 import com.vectoscalar.springboot.assignment.request.StudentRequest;
 import com.vectoscalar.springboot.assignment.response.StudentResponse;
 import com.vectoscalar.springboot.assignment.service.StudentService;
+import com.vectoscalar.springboot.assignment.service.StudentServiceImpl;
+import com.vectoscalar.springboot.assignment.util.CommonUtilities;
 
 @RestController
 @RequestMapping("/students")
@@ -28,7 +30,9 @@ public class StudentController {
 
 	@Autowired
 	private StudentService studentService;
-	
+
+	private static Logger logger = LoggerFactory.getLogger(StudentServiceImpl.class);
+
 	public StudentController() {
 		
 	}
@@ -36,44 +40,41 @@ public class StudentController {
 	// expose "/students" and return list of students
 	
 	@GetMapping("")
-	public ResponseEntity<List<StudentResponse>> findAll() {
-		List<Student> students = studentService.findAll();
-		List<StudentResponse> studentResponse = new ObjectMapper().convertValue(students,  new TypeReference<List<StudentResponse>>() {});
-		return new ResponseEntity<>(studentResponse, HttpStatus.OK);
+	public ResponseEntity<List<StudentResponse>> findAllStudents() {
+		logger.info("Request Recieved to fetch all the Students...");
+		List<StudentResponse> students = studentService.findAll();
+		return new ResponseEntity<>(students, HttpStatus.OK);
 	}
 
 	// add mapping for GET /students/{studentId}
 	
 	@GetMapping("/{studentId}")
 	public ResponseEntity<StudentResponse> getStudent(@PathVariable Integer studentId){
-		Student student = studentService.findById(studentId);
+		logger.info("Request Recieved to fetch Student with studentId: " + studentId);
+
+		StudentResponse student = studentService.findById(studentId);
 		
 		if (student == null) {
 			throw new EntityNotFoundException("Student id not found - " + studentId);
 		}
-		StudentResponse studentResponse = new ObjectMapper().convertValue(student, StudentResponse.class);
 		
-		return new ResponseEntity<>(studentResponse, HttpStatus.OK);
+		return new ResponseEntity<>(student, HttpStatus.OK);
 	}
 	
 	// add mapping for POST /students - add new student or update an existing student
 	
 	@PostMapping("")
-	public ResponseEntity<StudentResponse> addStudent(@RequestBody StudentRequest studentRequest) {
-		
-		Student student = new ObjectMapper().convertValue(studentRequest, Student.class);
-
-		studentService.save(student);
-		
-		StudentResponse studentResponse = new ObjectMapper().convertValue(student, StudentResponse.class);
-
-		return new ResponseEntity<>(studentResponse, HttpStatus.CREATED);
+	public ResponseEntity<StudentResponse> addStudent(@RequestBody StudentRequest studentRequest) throws Exception {
+		logger.info("Add Student Request Recieved -- " + CommonUtilities.convertObjectToJsonString(studentRequest));
+		StudentResponse savedStudent = studentService.createOrUpdate(studentRequest);
+		return new ResponseEntity<>(savedStudent, HttpStatus.CREATED);
 	}
 		
 	// add mapping for DELETE /students/{studentId} - delete student
 	
 	@DeleteMapping("/{studentId}")
 	public String deleteStudent(@PathVariable Integer studentId){
+		logger.info("Request Recieved to delete Student with studentId: " + studentId);
 		studentService.deleteById(studentId);
 		return "Deleted student id - " + studentId;
 	}

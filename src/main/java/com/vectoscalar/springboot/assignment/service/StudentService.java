@@ -2,17 +2,18 @@ package com.vectoscalar.springboot.assignment.service;
 
 import java.util.List;
 
-import com.vectoscalar.springboot.assignment.entity.Student;
+import com.vectoscalar.springboot.assignment.request.StudentRequest;
+import com.vectoscalar.springboot.assignment.response.StudentResponse;
 
 public interface StudentService {
 	
-	List<Student> findAll();
+	List<StudentResponse> findAll();
 	 
-	Student findById(Integer studentId);
+	StudentResponse findById(Integer studentId);
 	
-	Student findByEmail(String email);
+	StudentResponse findByEmail(String email);
 	
-	void save(Student student);
+	StudentResponse createOrUpdate(StudentRequest student);
 	
 	void deleteById(Integer studentId);
 }

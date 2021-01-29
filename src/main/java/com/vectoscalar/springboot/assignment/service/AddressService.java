@@ -2,17 +2,16 @@ package com.vectoscalar.springboot.assignment.service;
 
 import java.util.List;
 
-import com.vectoscalar.springboot.assignment.entity.Address;
+import com.vectoscalar.springboot.assignment.request.AddressRequest;
+import com.vectoscalar.springboot.assignment.response.AddressResponse;
 
 public interface AddressService {
 
-	List<Address> findAll();
+	List<AddressResponse> findByStudentId(Integer studentId);
 
-	List<Address> findByStudentId(Integer studentId);
+	AddressResponse findById(Integer addressId);
 
-	Address findById(Integer addressId);
-
-	void save(Address address);
+	void save(AddressRequest address);
 
 	void deleteById(Integer addressId);
 
