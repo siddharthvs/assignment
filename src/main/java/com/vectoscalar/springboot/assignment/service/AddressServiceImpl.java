@@ -31,7 +31,7 @@ public class AddressServiceImpl implements AddressService {
 	@Autowired
 	private StudentService studentService;
 
-	private static Logger logger = LoggerFactory.getLogger(StudentServiceImpl.class);
+	private static Logger logger = LoggerFactory.getLogger(AddressServiceImpl.class);
 
 	
 	public AddressServiceImpl() {
