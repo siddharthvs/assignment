@@ -59,10 +59,10 @@ public class StudentServiceImpl implements StudentService {
 
 	public StudentResponse createOrUpdate(StudentRequest studentRequest) {
 		
-		if(studentRequest.getEmail() == null) {
-			logger.info("Student Request does not contain email...");
-			throw new RuntimeException("Email not provided in the Request.");
-		}
+			if(studentRequest.getEmail() == null) {
+				logger.info("Student Request does not contain email...");
+				throw new RuntimeException("Email not provided in the Request.");
+			}
 		Student studentFromRequest = new ObjectMapper().convertValue(studentRequest, Student.class);
 		
 		logger.info("Checking if a student already exists with the provided email...");
@@ -76,19 +76,19 @@ public class StudentServiceImpl implements StudentService {
 			logger.info("Student doesn't exists with email: "+studentRequest.getEmail());
 			logger.info("Creating a new student");
 		}
-		if(studentFromRequest.getAddresses() != null) {
-			logger.info("Adding provided Addresses");
-
-			List<Address> addresses = studentFromRequest.getAddresses();
-			
-			studentFromRequest.setAddresses(null);
-			
-			for(Address address : addresses)
-			{
-				studentFromRequest.addAddress(address);
-			}
-		}
-		
+//		if(studentFromRequest.getAddresses() != null) {
+//			logger.info("Adding provided Addresses");
+//
+//			List<Address> addresses = studentFromRequest.getAddresses();
+//			
+//			studentFromRequest.setAddresses(null);
+//			
+//			for(Address address : addresses)
+//			{
+//				studentFromRequest.addAddress(address);
+//			}
+//		} // TO BE COMMENTED 
+//		
 		Student savedStudent = studentRepository.save(studentFromRequest);
 		return new ObjectMapper().convertValue(savedStudent, StudentResponse.class);
 	}

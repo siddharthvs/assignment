@@ -22,7 +22,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vectoscalar.springboot.assignment.request.AddressRequest;
 import com.vectoscalar.springboot.assignment.response.AddressResponse;
 import com.vectoscalar.springboot.assignment.service.AddressService;
-import com.vectoscalar.springboot.assignment.service.StudentServiceImpl;
 import com.vectoscalar.springboot.assignment.util.CommonUtilities;
 
 @RestController
@@ -32,7 +31,7 @@ public class AddressController {
 	@Autowired
 	private AddressService addressService;
 	
-	private static Logger logger = LoggerFactory.getLogger(StudentServiceImpl.class);
+	private static Logger logger = LoggerFactory.getLogger(AddressController.class);
 
 	public AddressController() {
 		

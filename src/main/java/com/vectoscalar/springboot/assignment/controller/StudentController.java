@@ -17,11 +17,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vectoscalar.springboot.assignment.request.StudentRequest;
 import com.vectoscalar.springboot.assignment.response.StudentResponse;
 import com.vectoscalar.springboot.assignment.service.StudentService;
-import com.vectoscalar.springboot.assignment.service.StudentServiceImpl;
 import com.vectoscalar.springboot.assignment.util.CommonUtilities;
 
 @RestController
@@ -31,7 +29,7 @@ public class StudentController {
 	@Autowired
 	private StudentService studentService;
 
-	private static Logger logger = LoggerFactory.getLogger(StudentServiceImpl.class);
+	private static Logger logger = LoggerFactory.getLogger(StudentController.class);
 
 	public StudentController() {
 		
@@ -66,12 +64,18 @@ public class StudentController {
 	@PostMapping("")
 	public ResponseEntity<StudentResponse> addStudent(@RequestBody StudentRequest studentRequest) throws Exception {
 		logger.info("Add Student Request Recieved -- " + CommonUtilities.convertObjectToJsonString(studentRequest));
+		
+		if(studentRequest.getEmail() == null) {
+			logger.info("Student Request does not contain email...");
+			throw new RuntimeException("Email not provided in the Request.");
+		}
+		
 		StudentResponse savedStudent = studentService.createOrUpdate(studentRequest);
 		return new ResponseEntity<>(savedStudent, HttpStatus.CREATED);
 	}
 		
 	// add mapping for DELETE /students/{studentId} - delete student
-	
+	// Performing Soft Delete for Student and associated Addresses
 	@DeleteMapping("/{studentId}")
 	public String deleteStudent(@PathVariable Integer studentId){
 		logger.info("Request Recieved to delete Student with studentId: " + studentId);
